@@ -22,26 +22,14 @@ func check(e error) {
 	}
 }
 
-func clip(num float64) float64 {
-	if num <= 0 {
-		return 0.
-	}
-
-	if num > 1. {
-		return 1.
-	}
-
-	return num
-}
-
 func interpolate(start Vec3f, end Vec3f, percent float64) Vec3f {
 	ft := float64(percent * 3.1415927)
 	f := (1 - math.Cos(ft)) * 0.5
 
 	return Vec3f{
-		clip(start.v0*(1.-f) + end.v0*f),
-		clip((start.v1*(1.-f) + end.v1*f)),
-		clip((start.v2*(1.-f) + end.v2*f)),
+		start.v0*(1.-f) + end.v0*f,
+		(start.v1*(1.-f) + end.v1*f),
+		(start.v2*(1.-f) + end.v2*f),
 	}
 }
 
@@ -54,9 +42,9 @@ func hexRgbToVec(color string) (Vec3f, error) {
 
 	r := (intColor & 0x00ff0000) >> 16
 	g := (intColor & 0x0000ff00) >> 8
-	b := (intColor & 0x0000ff)
+	b := intColor & 0x000000ff
 
-	return Vec3f{float64(r / 255), float64(g / 255), float64(b / 255)}, nil
+	return Vec3f{float64(r) / 255., float64(g) / 255., float64(b) / 255}, nil
 }
 
 var (
@@ -100,9 +88,9 @@ func main() {
 	check(err)
 
 	for i := 0; i < height*width; i++ {
-		_ = w.WriteByte(uint8(255 * math.Max(0., math.Min(1., framebuffer[i].v0))))
-		_ = w.WriteByte(uint8(255 * math.Max(0., math.Min(1., framebuffer[i].v1))))
-		_ = w.WriteByte(uint8(255 * math.Max(0., math.Min(1., framebuffer[i].v2))))
+		_ = w.WriteByte(uint8(255 * framebuffer[i].v0))
+		_ = w.WriteByte(uint8(255 * framebuffer[i].v1))
+		_ = w.WriteByte(uint8(255 * framebuffer[i].v2))
 	}
 
 	w.Flush()
